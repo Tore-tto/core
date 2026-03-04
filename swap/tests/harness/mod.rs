@@ -9,7 +9,7 @@ use futures::Future;
 use get_port::get_port;
 use libp2p::core::Multiaddr;
 use libp2p::{PeerId, Swarm};
-use monero_harness::{image, Monero};
+use beldex_harness::{image, Beldex};
 use std::cmp::Ordering;
 use std::fmt;
 use std::path::{Path, PathBuf};

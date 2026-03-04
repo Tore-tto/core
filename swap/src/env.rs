@@ -66,7 +66,7 @@ impl GetConfig for Testnet {
             bitcoin_network: bitcoin::Network::Testnet,
             monero_avg_block_time: 2.minutes(),
             monero_finality_confirmations: 10,
-            monero_network: monero::Network::Stagenet,
+            monero_network: monero::Network::Mainnet,
         }
     }
 }

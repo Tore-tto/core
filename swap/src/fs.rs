@@ -3,10 +3,10 @@ use directories_next::ProjectDirs;
 use std::path::{Path, PathBuf};
 
 /// This is to store the configuration and seed files
-// Linux: /home/<user>/.config/xmr-btc-swap/
-// OSX: /Users/<user>/Library/Preferences/xmr-btc-swap/
+// Linux: /home/<user>/.config/bdx-btc-swap/
+// OSX: /Users/<user>/Library/Preferences/bdx-btc-swap/
 fn default_config_dir() -> Option<PathBuf> {
-    ProjectDirs::from("", "", "xmr-btc-swap").map(|proj_dirs| proj_dirs.config_dir().to_path_buf())
+    ProjectDirs::from("", "", "bdx-btc-swap").map(|proj_dirs| proj_dirs.config_dir().to_path_buf())
 }
 
 pub fn default_config_path() -> Result<PathBuf> {
@@ -16,10 +16,10 @@ pub fn default_config_path() -> Result<PathBuf> {
 }
 
 /// This is to store the DB
-// Linux: /home/<user>/.local/share/xmr-btc-swap/
-// OSX: /Users/<user>/Library/Application Support/xmr-btc-swap/
+// Linux: /home/<user>/.local/share/bdx-btc-swap/
+// OSX: /Users/<user>/Library/Application Support/bdx-btc-swap/
 pub fn default_data_dir() -> Option<std::path::PathBuf> {
-    ProjectDirs::from("", "", "xmr-btc-swap").map(|proj_dirs| proj_dirs.data_dir().to_path_buf())
+    ProjectDirs::from("", "", "bdx-btc-swap").map(|proj_dirs| proj_dirs.data_dir().to_path_buf())
 }
 
 pub fn ensure_directory_exists(file: &Path) -> Result<(), std::io::Error> {

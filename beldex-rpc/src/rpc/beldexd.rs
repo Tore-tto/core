@@ -21,47 +21,8 @@ impl Client {
             inner: reqwest::Client::new(),
             url,
         }
-    }
-
-    pub async fn generate_blocks(
-        &self,
-        amount_of_blocks: u32,
-        wallet_address: &str,
-    ) -> Result<GenerateBlocks> {
-        let params = GenerateBlocksParams {
-            amount_of_blocks,
-            wallet_address: wallet_address.to_owned(),
-        };
-        let url = self.url.clone();
-        // // Step 1:  Get the auth header
-        // let res = self.inner.get(url.clone()).send().await?;
-        // let headers = res.headers();
-        // let wwwauth = headers["www-authenticate"].to_str()?;
-        //
-        // // Step 2:  Given the auth header, sign the digest for the real req.
-        // let tmp_url = url.clone();
-        // let context = AuthContext::new("username", "password", tmp_url.path());
-        // let mut prompt = digest_auth::parse(wwwauth)?;
-        // let answer = prompt.respond(&context)?.to_header_string();
-
-        let request = Request::new("generateblocks", params);
-
-        let response = self
-            .inner
-            .post(url)
-            .json(&request)
-            .send()
-            .await?
-            .text()
-            .await?;
-
-        debug!("generate blocks response: {}", response);
-
-        let res: Response<GenerateBlocks> = serde_json::from_str(&response)?;
-
-        Ok(res.result)
-    }
-
+    }    
+    
     // $ curl http://127.0.0.1:18081/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_block_header_by_height","params":{"height":1}}' -H 'Content-Type: application/json'
     pub async fn get_block_header_by_height(&self, height: u32) -> Result<BlockHeader> {
         let params = GetBlockHeaderByHeightParams { height };
@@ -101,19 +62,6 @@ impl Client {
 
         Ok(res.result.count)
     }
-}
-
-#[derive(Clone, Debug, Serialize)]
-struct GenerateBlocksParams {
-    amount_of_blocks: u32,
-    wallet_address: String,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-pub struct GenerateBlocks {
-    pub blocks: Vec<String>,
-    pub height: u32,
-    pub status: String,
 }
 
 #[derive(Clone, Debug, Serialize)]

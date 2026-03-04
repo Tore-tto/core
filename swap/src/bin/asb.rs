@@ -202,7 +202,7 @@ async fn init_monero_wallet(
     env_config: swap::env::Config,
 ) -> Result<monero::Wallet> {
     let wallet = monero::Wallet::open_or_create(
-        config.monero.wallet_rpc_url.clone(),
+        config.beldex.wallet_rpc_url.clone(),
         DEFAULT_WALLET_NAME.to_string(),
         env_config,
     )

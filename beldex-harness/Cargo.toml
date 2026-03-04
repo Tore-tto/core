@@ -1,0 +1,19 @@
+[package]
+name = "beldex-harness"
+version = "0.1.0"
+authors = ["Tore-tto <toretto@beldex.io>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1"
+futures = "0.3"
+beldex-rpc = { path = "../beldex-rpc" }
+port_check = "0.1"
+rand = "0.7"
+spectral = "0.6"
+testcontainers = "0.12"
+tokio = { version = "1", default-features = false, features = ["rt-multi-thread", "time", "macros"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.2", default-features = false, features = ["fmt", "ansi", "env-filter", "tracing-log"] }

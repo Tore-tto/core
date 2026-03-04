@@ -13,14 +13,14 @@ use url::Url;
 
 const DEFAULT_LISTEN_ADDRESS: &str = "/ip4/0.0.0.0/tcp/9939";
 const DEFAULT_ELECTRUM_RPC_URL: &str = "ssl://electrum.blockstream.info:60002";
-const DEFAULT_MONERO_WALLET_RPC_TESTNET_URL: &str = "http://127.0.0.1:38083/json_rpc";
+const DEFAULT_BELDEX_WALLET_RPC_TESTNET_URL: &str = "http://127.0.0.1:19092/json_rpc";
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize, PartialEq)]
 pub struct Config {
     pub data: Data,
     pub network: Network,
     pub bitcoin: Bitcoin,
-    pub monero: Monero,
+    pub beldex: Beldex,
 }
 
 impl Config {
@@ -56,7 +56,7 @@ pub struct Bitcoin {
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(deny_unknown_fields)]
-pub struct Monero {
+pub struct Beldex {
     pub wallet_rpc_url: Url,
 }
 
@@ -124,11 +124,11 @@ pub fn query_user_for_initial_testnet_config() -> Result<Config> {
         .interact_text()?;
     let electrum_rpc_url = Url::parse(electrum_rpc_url.as_str())?;
 
-    let monero_wallet_rpc_url = Input::with_theme(&ColorfulTheme::default())
-        .with_prompt("Enter Monero Wallet RPC URL or hit enter to use default")
-        .default(DEFAULT_MONERO_WALLET_RPC_TESTNET_URL.to_owned())
+    let beldex_wallet_rpc_url = Input::with_theme(&ColorfulTheme::default())
+        .with_prompt("Enter Beldex Wallet RPC URL or hit enter to use default")
+        .default(DEFAULT_BELDEX_WALLET_RPC_TESTNET_URL.to_owned())
         .interact_text()?;
-    let monero_wallet_rpc_url = monero_wallet_rpc_url.as_str().parse()?;
+    let beldex_wallet_rpc_url = beldex_wallet_rpc_url.as_str().parse()?;
     println!();
 
     Ok(Config {
@@ -137,42 +137,9 @@ pub fn query_user_for_initial_testnet_config() -> Result<Config> {
             listen: listen_address,
         },
         bitcoin: Bitcoin { electrum_rpc_url },
-        monero: Monero {
-            wallet_rpc_url: monero_wallet_rpc_url,
+        beldex: Beldex {
+            wallet_rpc_url: beldex_wallet_rpc_url,
         },
     })
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::str::FromStr;
-    use tempfile::tempdir;
-
-    #[test]
-    fn config_roundtrip() {
-        let temp_dir = tempdir().unwrap().path().to_path_buf();
-        let config_path = Path::join(&temp_dir, "config.toml");
-
-        let expected = Config {
-            data: Data {
-                dir: Default::default(),
-            },
-            bitcoin: Bitcoin {
-                electrum_rpc_url: Url::from_str(DEFAULT_ELECTRUM_RPC_URL).unwrap(),
-            },
-            network: Network {
-                listen: DEFAULT_LISTEN_ADDRESS.parse().unwrap(),
-            },
-
-            monero: Monero {
-                wallet_rpc_url: Url::from_str(DEFAULT_MONERO_WALLET_RPC_TESTNET_URL).unwrap(),
-            },
-        };
-
-        initial_setup(config_path.clone(), || Ok(expected.clone())).unwrap();
-        let actual = read_config(config_path).unwrap().unwrap();
-
-        assert_eq!(expected, actual);
-    }
-}

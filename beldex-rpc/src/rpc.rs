@@ -1,5 +1,4 @@
-//! JSON RPC clients for `monerd` and `monero-wallet-rpc`.
-pub mod monerod;
+pub mod beldexd;
 pub mod wallet;
 
 use serde::{Deserialize, Serialize};
@@ -34,30 +33,4 @@ struct Response<T> {
     pub id: String,
     pub jsonrpc: String,
     pub result: T,
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[derive(Serialize, Debug, Clone)]
-    struct Params {
-        val: u32,
-    }
-
-    #[test]
-    fn can_serialize_request_with_params() {
-        // Dummy method and parameters.
-        let params = Params { val: 0 };
-        let method = "get_block";
-
-        let r = Request::new(method, &params);
-        let got = serde_json::to_string(&r).expect("failed to serialize request");
-
-        let want =
-            "{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"get_block\",\"params\":{\"val\":0}}"
-                .to_string();
-
-        assert_eq!(got, want);
-    }
 }

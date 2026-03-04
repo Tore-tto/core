@@ -4,7 +4,7 @@ use crate::monero::{monero_private_key, TransferProof};
 use crate::protocol::alice;
 use crate::protocol::alice::AliceState;
 use ::bitcoin::hashes::core::fmt::Display;
-use monero_rpc::wallet::BlockHeight;
+use beldex_rpc::wallet::BlockHeight;
 use serde::{Deserialize, Serialize};
 
 // Large enum variant is fine because this is only used for database

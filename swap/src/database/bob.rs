@@ -2,7 +2,7 @@ use crate::monero::TransferProof;
 use crate::protocol::bob;
 use crate::protocol::bob::BobState;
 use ::bitcoin::hashes::core::fmt::Display;
-use monero_rpc::wallet::BlockHeight;
+use beldex_rpc::wallet::BlockHeight;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]

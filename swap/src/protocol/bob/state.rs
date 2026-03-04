@@ -11,7 +11,7 @@ use anyhow::{anyhow, bail, Context, Result};
 use ecdsa_fun::adaptor::{Adaptor, HashTranscript};
 use ecdsa_fun::nonce::Deterministic;
 use ecdsa_fun::Signature;
-use monero_rpc::wallet::BlockHeight;
+use beldex_rpc::wallet::BlockHeight;
 use rand::{CryptoRng, RngCore};
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;

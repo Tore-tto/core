@@ -4,8 +4,8 @@ use crate::monero::{
 };
 use ::monero::{Address, Network, PrivateKey, PublicKey};
 use anyhow::{Context, Result};
-use monero_rpc::wallet;
-use monero_rpc::wallet::{BlockHeight, CheckTxKey, Refreshed};
+use beldex_rpc::wallet;
+use beldex_rpc::wallet::{BlockHeight, CheckTxKey, Refreshed};
 use std::future::Future;
 use std::str::FromStr;
 use std::time::Duration;
@@ -321,7 +321,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use monero_rpc::wallet::CheckTxKey;
+    use beldex_rpc::wallet::CheckTxKey;
     use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
     use std::sync::Arc;
 

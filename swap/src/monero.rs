@@ -17,7 +17,7 @@ use std::fmt;
 use std::ops::{Add, Mul, Sub};
 use std::str::FromStr;
 
-pub const PICONERO_OFFSET: u64 = 1_000_000_000_000;
+pub const PICONERO_OFFSET: u64 = 1_000_000_000;
 
 pub fn private_key_from_secp256k1_scalar(scalar: bitcoin::Scalar) -> PrivateKey {
     let mut bytes = scalar.to_bytes();
@@ -144,8 +144,8 @@ impl fmt::Display for Amount {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut decimal = Decimal::from(self.0);
         decimal
-            .set_scale(12)
-            .expect("12 is smaller than max precision of 28");
+            .set_scale(9)
+            .expect("9 is smaller than max precision of 28");
         write!(f, "{} XMR", decimal)
     }
 }

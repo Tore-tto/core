@@ -7,7 +7,7 @@ use std::path::PathBuf;
 #[derive(structopt::StructOpt, Debug)]
 #[structopt(
     name = "asb",
-    about = "Automated Swap Backend for swapping XMR for BTC",
+    about = "Automated Swap Backend for swapping BDX for BTC",
     author
 )]
 pub struct Arguments {
@@ -23,7 +23,7 @@ pub struct Arguments {
 }
 
 #[derive(structopt::StructOpt, Debug)]
-#[structopt(name = "xmr_btc-swap", about = "XMR BTC atomic swap")]
+#[structopt(name = "bdx_btc-swap", about = "BDX BTC atomic swap")]
 pub enum Command {
     Start {
         #[structopt(long = "max-buy-btc", help = "The maximum amount of BTC the ASB is willing to buy.", default_value="0.005", parse(try_from_str = parse_btc))]

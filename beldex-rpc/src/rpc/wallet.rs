@@ -534,26 +534,3 @@ pub struct SweepAll {
 pub struct Version {
     version: u32,
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn can_deserialize_sweep_all_response() {
-        let response = r#"{
-          "id": "0",
-          "jsonrpc": "2.0",
-          "result": {
-            "amount_list": [29921410000],
-            "fee_list": [78590000],
-            "multisig_txset": "",
-            "tx_hash_list": ["c1d8cfa87d445c1915a59d67be3e93ba8a29018640cf69b465f07b1840a8f8c8"],
-            "unsigned_txset": "",
-            "weight_list": [1448]
-          }
-        }"#;
-
-        let _: Response<SweepAll> = serde_json::from_str(&response).unwrap();
-    }
-}

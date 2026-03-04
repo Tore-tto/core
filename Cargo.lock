@@ -330,6 +330,33 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2dabbe35f96fb9507f7330793dc490461b2962659ac5d427181e451a623751d1"
 
 [[package]]
+name = "beldex-harness"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "beldex-rpc",
+ "futures",
+ "port_check",
+ "rand 0.7.3",
+ "spectral",
+ "testcontainers 0.12.0",
+ "tokio 1.4.0",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "beldex-rpc"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tracing",
+]
+
+[[package]]
 name = "big-bytes"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2095,33 +2122,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "monero-harness"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "futures",
- "monero-rpc",
- "port_check",
- "rand 0.7.3",
- "spectral",
- "testcontainers 0.12.0",
- "tokio 1.4.0",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "monero-rpc"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "reqwest",
- "serde",
- "serde_json",
- "tracing",
-]
-
-[[package]]
 name = "multihash"
 version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3568,6 +3568,8 @@ dependencies = [
  "base64 0.13.0",
  "bdk",
  "bdk-testutils",
+ "beldex-harness",
+ "beldex-rpc",
  "big-bytes",
  "bitcoin",
  "bitcoin-harness",
@@ -3586,8 +3588,6 @@ dependencies = [
  "libp2p-async-await",
  "miniscript",
  "monero",
- "monero-harness",
- "monero-rpc",
  "pem",
  "port_check",
  "prettytable-rs",
