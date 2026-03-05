@@ -1,4 +1,4 @@
-use ::monero::Network;
+use ::beldex_rpc::BeldexNetwork;
 use anyhow::{Context, Result};
 use big_bytes::BigByte;
 use futures::{StreamExt, TryStreamExt};
@@ -21,19 +21,19 @@ compile_error!("unsupported operating system");
 const DOWNLOAD_URL: &str = "http://downloads.getmonero.org/cli/monero-mac-x64-v0.17.1.9.tar.bz2";
 
 #[cfg(target_os = "linux")]
-const DOWNLOAD_URL: &str = "https://downloads.getmonero.org/cli/monero-linux-x64-v0.17.1.9.tar.bz2";
+const DOWNLOAD_URL: &str = "https://github.com/Beldex-Coin/beldex/releases/download/v7.0.1/beldex-linux-x86_64-v7.0.1.tar.xz";
 
 #[cfg(target_os = "windows")]
 const DOWNLOAD_URL: &str = "https://downloads.getmonero.org/cli/monero-win-x64-v0.17.1.9.zip";
 
 #[cfg(any(target_os = "macos", target_os = "linux"))]
-const PACKED_FILE: &str = "monero-wallet-rpc";
+const PACKED_FILE: &str = "./beldex-wallet-rpc";
 
 #[cfg(target_os = "windows")]
-const PACKED_FILE: &str = "monero-wallet-rpc.exe";
+const PACKED_FILE: &str = "beldex-wallet-rpc.exe";
 
 #[derive(Debug, Clone, Copy, thiserror::Error)]
-#[error("monero wallet rpc executable not found in downloaded archive")]
+#[error("beldex wallet rpc executable not found in downloaded archive")]
 pub struct ExecutableNotFoundInArchive;
 
 pub struct WalletRpcProcess {
@@ -85,7 +85,7 @@ impl WalletRpc {
                 .parse::<u64>()?;
 
             tracing::info!(
-                "Downloading monero-wallet-rpc ({})",
+                "Downloading beldex-wallet-rpc ({})",
                 content_length.big_byte(2)
             );
 
@@ -93,7 +93,14 @@ impl WalletRpc {
                 .bytes_stream()
                 .map_err(|err| std::io::Error::new(ErrorKind::Other, err));
 
-            #[cfg(not(target_os = "windows"))]
+            #[cfg(target_os = "linux")]
+            let mut stream = FramedRead::new(
+                async_compression::tokio::bufread::XzDecoder::new(StreamReader::new(byte_stream)),
+                BytesCodec::new(),
+            )
+            .map_ok(|bytes| bytes.freeze());
+
+            #[cfg(target_os = "macos")]
             let mut stream = FramedRead::new(
                 async_compression::tokio::bufread::BzDecoder::new(StreamReader::new(byte_stream)),
                 BytesCodec::new(),
@@ -115,47 +122,52 @@ impl WalletRpc {
         Ok(monero_wallet_rpc)
     }
 
-    pub async fn run(&self, network: Network, daemon_host: &str) -> Result<WalletRpcProcess> {
+    pub async fn run(&self, network: BeldexNetwork, daemon_host: &str) -> Result<WalletRpcProcess> {
         let port = tokio::net::TcpListener::bind("127.0.0.1:0")
             .await?
             .local_addr()?
             .port();
 
-        tracing::debug!("Starting monero-wallet-rpc on port {}", port);
+        tracing::debug!("Starting beldex-wallet-rpc on port {}", port);
 
         let mut child = Command::new(self.exec_path())
             .env("LANG", "en_AU.UTF-8")
             .stdout(Stdio::piped())
             .kill_on_drop(true)
             .arg(match network {
-                Network::Mainnet => "--mainnet",
-                Network::Stagenet => "--stagenet",
-                Network::Testnet => "--testnet",
+                BeldexNetwork::Mainnet => "",
+                BeldexNetwork::Testnet => "--testnet",
+                BeldexNetwork::Stagenet => "--stagenet",
             })
-            .arg("--daemon-host")
+            .arg("--daemon-address")
             .arg(daemon_host)
             .arg("--rpc-bind-port")
             .arg(format!("{}", port))
             .arg("--disable-rpc-login")
             .arg("--wallet-dir")
-            .arg(self.working_dir.join("monero-data"))
+            .arg(self.working_dir.join("beldex-data"))
+            .arg("--log-level")
+            .arg("1")
             .spawn()?;
 
         let stdout = child
             .stdout
             .take()
-            .expect("monero wallet rpc stdout was not piped parent process");
+            .expect("beldex wallet rpc stdout was not piped parent process");
 
         let mut reader = BufReader::new(stdout).lines();
 
         #[cfg(not(target_os = "windows"))]
+        let log_path = self.working_dir.join("beldex-wallet-rpc.log");
+            // Clear old log file first
+            let _ = tokio::fs::remove_file(&log_path).await;
         while let Some(line) = reader.next_line().await? {
             if line.contains("Starting wallet RPC server") {
                 break;
             }
         }
 
-        // If we do not hear from the monero_wallet_rpc process for 3 seconds we assume
+        // If we do not hear from the beldex_wallet_rpc process for 3 seconds we assume
         // it is is ready
         #[cfg(target_os = "windows")]
         while let Ok(line) =
@@ -164,9 +176,8 @@ impl WalletRpc {
             line?;
         }
 
-        // Send a json rpc request to make sure monero_wallet_rpc is ready
+        // Send a json rpc request to make sure beldex_wallet_rpc is ready
         Client::localhost(port).get_version().await?;
-
         Ok(WalletRpcProcess {
             _child: child,
             port,

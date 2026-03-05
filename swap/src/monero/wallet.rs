@@ -30,7 +30,7 @@ impl Wallet {
         let open_wallet_response = client.open_wallet(name.as_str()).await;
         if open_wallet_response.is_err() {
             client.create_wallet(name.as_str()).await.context(
-                "Unable to create Monero wallet, please ensure that the monero-wallet-rpc is available",
+                "Unable to create Monero wallet, please ensure that the beldex-wallet-rpc is available",
             )?;
 
             tracing::debug!("Created Monero wallet {}", name);
@@ -47,7 +47,11 @@ impl Wallet {
             monero::Address::from_str(client.get_address(0).await?.address.as_str())?;
         Ok(Self {
             inner: Mutex::new(client),
-            network: env_config.monero_network,
+            network: match env_config.monero_network {
+                beldex_rpc::BeldexNetwork::Mainnet  => monero::Network::Mainnet,
+                beldex_rpc::BeldexNetwork::Testnet  => monero::Network::Testnet,
+                beldex_rpc::BeldexNetwork::Stagenet => monero::Network::Stagenet,
+            },
             name,
             main_address,
             sync_interval: env_config.monero_sync_interval(),

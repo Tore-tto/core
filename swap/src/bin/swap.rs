@@ -85,15 +85,15 @@ async fn main() -> Result<()> {
             alice_multiaddr,
             monero_params:
                 MoneroParams {
-                    receive_monero_address,
+                    receive_beldex_address,
                     monero_daemon_host,
                 },
             electrum_rpc_url,
         } => {
-            if receive_monero_address.network != env_config.monero_network {
+            if receive_beldex_address.network != env_config.monero_network {
                 bail!(
                     "Given monero address is on network {:?}, expected address on network {:?}",
-                    receive_monero_address.network,
+                    receive_beldex_address.network,
                     env_config.monero_network
                 )
             }
@@ -138,7 +138,7 @@ async fn main() -> Result<()> {
                 Arc::new(monero_wallet),
                 env_config,
                 event_loop_handle,
-                receive_monero_address,
+                receive_beldex_address.to_monero_address()?,
             )
             .with_init_params(send_bitcoin)
             .build()?;
@@ -170,13 +170,13 @@ async fn main() -> Result<()> {
             alice_multiaddr,
             monero_params:
                 MoneroParams {
-                    receive_monero_address,
+                    receive_beldex_address,
                     monero_daemon_host,
                 },
             electrum_rpc_url,
         } => {
-            if receive_monero_address.network != env_config.monero_network {
-                bail!("The given monero address is on network {:?}, expected address of network {:?}.", receive_monero_address.network, env_config.monero_network)
+            if receive_beldex_address.network != env_config.monero_network {
+                bail!("The given beldex address is on network {:?}, expected address of network {:?}.", receive_beldex_address.network, env_config.monero_network)
             }
 
             let bitcoin_wallet =
@@ -200,7 +200,7 @@ async fn main() -> Result<()> {
                 Arc::new(monero_wallet),
                 env_config,
                 event_loop_handle,
-                receive_monero_address,
+                receive_beldex_address.to_monero_address()?,
             )
             .build()?;
 
@@ -282,7 +282,7 @@ async fn init_monero_wallet(
 
     const MONERO_BLOCKCHAIN_MONITORING_WALLET_NAME: &str = "swap-tool-blockchain-monitoring-wallet";
 
-    let monero_wallet_rpc = monero::WalletRpc::new(data_dir.join("monero")).await?;
+    let monero_wallet_rpc = monero::WalletRpc::new(data_dir.join("beldex")).await?;
 
     let monero_wallet_rpc_process = monero_wallet_rpc
         .run(network, monero_daemon_host.as_str())

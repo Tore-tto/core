@@ -1,14 +1,14 @@
 use crate::fs::default_data_dir;
-use anyhow::{Context, Result};
+use anyhow::Result;
 use libp2p::core::Multiaddr;
 use libp2p::PeerId;
 use std::path::PathBuf;
 use std::str::FromStr;
 use url::Url;
 use uuid::Uuid;
-
+use beldex_rpc::{parse_beldex_address, BeldexAddress};
 // Port is assumed to be stagenet standard port 38081
-pub const DEFAULT_STAGENET_MONERO_DAEMON_HOST: &str = "monero-stagenet.exan.tech";
+pub const DEFAULT_STAGENET_MONERO_DAEMON_HOST: &str = "http://127.0.0.1:29091";
 
 pub const DEFAULT_ELECTRUM_HTTP_URL: &str = "https://blockstream.info/testnet/api/";
 const DEFAULT_ELECTRUM_RPC_URL: &str = "ssl://electrum.blockstream.info:60002";
@@ -110,10 +110,10 @@ pub enum Command {
 #[derive(structopt::StructOpt, Debug)]
 pub struct MoneroParams {
     #[structopt(long = "receive-address",
-        help = "Provide the monero address where you would like to receive monero",
-        parse(try_from_str = parse_monero_address)
+        help = "Provide the beldex address where you would like to receive beldex",
+        parse(try_from_str = parse_beldex_address)
     )]
-    pub receive_monero_address: monero::Address,
+    pub receive_beldex_address: BeldexAddress,
 
     #[structopt(
         long = "monero-daemon-host",
@@ -148,13 +148,4 @@ impl ToString for Data {
             .into_string()
             .expect("default datadir to be convertible to string")
     }
-}
-
-fn parse_monero_address(s: &str) -> Result<monero::Address> {
-    monero::Address::from_str(s).with_context(|| {
-        format!(
-            "Failed to parse {} as a monero address, please make sure it is a valid address",
-            s
-        )
-    })
 }

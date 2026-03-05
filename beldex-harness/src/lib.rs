@@ -28,7 +28,6 @@ use beldex_rpc::{
 use std::time::Duration;
 use tokio::time;
 
-const BLOCK_TIME_SECS: u64 = 1;
 const WAIT_WALLET_SYNC_MILLIS: u64 = 1000;
 
 pub const BELDEXD_RPC_PORT: u16 = 29091;

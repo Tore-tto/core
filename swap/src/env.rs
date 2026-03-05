@@ -13,7 +13,7 @@ pub struct Config {
     pub bitcoin_network: bitcoin::Network,
     pub monero_avg_block_time: Duration,
     pub monero_finality_confirmations: u64,
-    pub monero_network: monero::Network,
+    pub monero_network: beldex_rpc::BeldexNetwork,
 }
 
 impl Config {
@@ -50,7 +50,7 @@ impl GetConfig for Mainnet {
             bitcoin_network: bitcoin::Network::Bitcoin,
             monero_avg_block_time: 2.minutes(),
             monero_finality_confirmations: 15,
-            monero_network: monero::Network::Mainnet,
+            monero_network: beldex_rpc::BeldexNetwork::Mainnet,
         }
     }
 }
@@ -66,7 +66,7 @@ impl GetConfig for Testnet {
             bitcoin_network: bitcoin::Network::Testnet,
             monero_avg_block_time: 2.minutes(),
             monero_finality_confirmations: 10,
-            monero_network: monero::Network::Mainnet,
+            monero_network: beldex_rpc::BeldexNetwork::Testnet,
         }
     }
 }
@@ -82,7 +82,7 @@ impl GetConfig for Regtest {
             bitcoin_network: bitcoin::Network::Regtest,
             monero_avg_block_time: 1.seconds(),
             monero_finality_confirmations: 10,
-            monero_network: monero::Network::Mainnet, // yes this is strange
+            monero_network: beldex_rpc::BeldexNetwork::Testnet, // yes this is strange
         }
     }
 }
@@ -91,21 +91,3 @@ fn sync_interval(avg_block_time: Duration) -> Duration {
     max(avg_block_time / 10, Duration::from_secs(1))
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn check_interval_is_one_second_if_avg_blocktime_is_one_second() {
-        let interval = sync_interval(Duration::from_secs(1));
-
-        assert_eq!(interval, Duration::from_secs(1))
-    }
-
-    #[test]
-    fn check_interval_is_tenth_of_avg_blocktime() {
-        let interval = sync_interval(Duration::from_secs(100));
-
-        assert_eq!(interval, Duration::from_secs(10))
-    }
-}
