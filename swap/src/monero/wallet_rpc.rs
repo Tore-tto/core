@@ -27,7 +27,7 @@ const DOWNLOAD_URL: &str = "https://github.com/Beldex-Coin/beldex/releases/downl
 const DOWNLOAD_URL: &str = "https://downloads.getmonero.org/cli/monero-win-x64-v0.17.1.9.zip";
 
 #[cfg(any(target_os = "macos", target_os = "linux"))]
-const PACKED_FILE: &str = "./beldex-wallet-rpc";
+const PACKED_FILE: &str = "beldex-wallet-rpc";
 
 #[cfg(target_os = "windows")]
 const PACKED_FILE: &str = "beldex-wallet-rpc.exe";
@@ -135,7 +135,7 @@ impl WalletRpc {
             .stdout(Stdio::piped())
             .kill_on_drop(true)
             .arg(match network {
-                BeldexNetwork::Mainnet => "",
+                BeldexNetwork::Mainnet => "--mainnet",
                 BeldexNetwork::Testnet => "--testnet",
                 BeldexNetwork::Stagenet => "--stagenet",
             })
@@ -176,7 +176,7 @@ impl WalletRpc {
             line?;
         }
 
-        // Send a json rpc request to make sure beldex_wallet_rpc is ready
+        // Send a json rpc request to make sure monero_wallet_rpc is ready
         Client::localhost(port).get_version().await?;
         Ok(WalletRpcProcess {
             _child: child,
@@ -185,7 +185,7 @@ impl WalletRpc {
     }
 
     fn archive_path(&self) -> PathBuf {
-        self.working_dir.join("monero-cli-wallet.archive")
+        self.working_dir.join("beldex-cli-wallet.archive")
     }
 
     fn exec_path(&self) -> PathBuf {

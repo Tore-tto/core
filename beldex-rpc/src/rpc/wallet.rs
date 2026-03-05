@@ -239,7 +239,7 @@ impl Client {
 
     /// Get wallet block height, this might be behind monerod height.
     pub async fn block_height(&self) -> Result<BlockHeight> {
-        let request = Request::new("get_height", "");
+        let request = Request::new("get_height", serde_json::json!({}));
 
         let response = self
             .inner
@@ -319,7 +319,7 @@ impl Client {
     }
 
     pub async fn refresh(&self) -> Result<Refreshed> {
-        let request = Request::new("refresh", "");
+        let request = Request::new("refresh", serde_json::json!({}));
 
         let response = self
             .inner
@@ -359,8 +359,7 @@ impl Client {
     }
 
     pub async fn get_version(&self) -> Result<Version> {
-        let request = Request::new("get_version", "");
-
+        let request = Request::new("get_version", serde_json::json!({}));
         let response = self
             .inner
             .post(self.url.clone())
@@ -369,7 +368,6 @@ impl Client {
             .await?
             .text()
             .await?;
-
         debug!("get_version RPC response: {}", response);
 
         let r = serde_json::from_str::<Response<Version>>(&response)?;
