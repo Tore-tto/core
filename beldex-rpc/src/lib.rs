@@ -52,7 +52,7 @@ impl FromStr for BeldexAddress {
         let prefix = decoded[0];
 
         let network = match prefix {
-            0xd1 => BeldexNetwork::Mainnet,   // 209
+            0xd1 => BeldexNetwork::Mainnet,   
             53   => BeldexNetwork::Testnet,
             24   => BeldexNetwork::Stagenet,
             _    => bail!("Unknown Beldex address prefix: {} (0x{:02x})", prefix, prefix),

@@ -26,11 +26,12 @@ use swap::env::GetConfig;
 use swap::fs::default_config_path;
 use swap::monero::Amount;
 use swap::network::swarm;
-use swap::protocol::alice::event_loop::KrakenRate;
+use swap::protocol::alice::event_loop::CoinGeckoRate;
 use swap::protocol::alice::{run, Behaviour, EventLoop};
 use swap::seed::Seed;
 use swap::trace::init_tracing;
-use swap::{bitcoin, env, kraken, monero};
+use std::time::Duration;
+use swap::{bitcoin, coingecko, env, monero};
 use tracing::{info, warn};
 use tracing_subscriber::filter::LevelFilter;
 
@@ -96,7 +97,7 @@ async fn main() -> Result<()> {
                 info!("Monero balance: {}", monero_balance);
             }
 
-            let kraken_price_updates = kraken::connect()?;
+            let coingecko_price_updates = coingecko::connect(Duration::from_secs(60))?;
 
             let mut swarm = swarm::new::<Behaviour>(&seed)?;
             Swarm::listen_on(&mut swarm, config.network.listen)
@@ -108,7 +109,7 @@ async fn main() -> Result<()> {
                 Arc::new(bitcoin_wallet),
                 Arc::new(monero_wallet),
                 Arc::new(db),
-                KrakenRate::new(ask_spread, kraken_price_updates),
+                CoinGeckoRate::new(ask_spread, coingecko_price_updates),
                 max_buy,
             )
             .unwrap();

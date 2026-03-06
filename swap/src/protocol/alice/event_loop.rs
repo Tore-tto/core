@@ -491,3 +491,29 @@ impl<T> Default for MpscChannels<T> {
         MpscChannels { sender, receiver }
     }
 }
+/// Produces [`Rate`]s based on BDX/BTC [`PriceUpdate`]s from CoinGecko and a
+/// configured spread.
+#[derive(Debug)]
+pub struct CoinGeckoRate {
+    ask_spread: Decimal,
+    price_updates: crate::coingecko::PriceUpdates,
+}
+
+impl CoinGeckoRate {
+    pub fn new(ask_spread: Decimal, price_updates: crate::coingecko::PriceUpdates) -> Self {
+        Self {
+            ask_spread,
+            price_updates,
+        }
+    }
+}
+
+impl LatestRate for CoinGeckoRate {
+    type Error = crate::coingecko::Error;
+
+    fn latest_rate(&mut self) -> Result<Rate, Self::Error> {
+        let update = self.price_updates.latest_update()?;
+        let rate = Rate::new(update.ask, self.ask_spread);
+        Ok(rate)
+    }
+}

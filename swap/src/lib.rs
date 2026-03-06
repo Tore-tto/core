@@ -23,6 +23,7 @@ pub mod database;
 pub mod env;
 pub mod fs;
 pub mod kraken;
+pub mod coingecko;
 pub mod monero;
 pub mod network;
 pub mod protocol;
