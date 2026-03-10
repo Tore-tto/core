@@ -484,12 +484,16 @@ struct CheckTxKeyParams {
     address: String,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct CheckTxKey {
+    #[serde(default)]
     pub confirmations: u64,
+    #[serde(default)]
     pub received: u64,
+    // Beldex RPC may return this field, monero returns `in_pool`
+    #[serde(default)]
+    pub in_pool: bool,
 }
-
 #[derive(Clone, Debug, Serialize)]
 pub struct GenerateFromKeysParams {
     pub restore_height: u32,
