@@ -341,7 +341,9 @@ async fn determine_btc_to_swap(
 
     let btc_swap_amount = min(max_giveable, max_accepted);
 
-    let min_swap_amount = Amount::from_sat(bitcoin::TX_FEE + 1_000);
+    // Ensure we have enough to also cover subsequent transaction fees (like cancel AND refund)
+    // plus a small dust threshold.
+    let min_swap_amount = Amount::from_sat(2 * bitcoin::TX_FEE + 1_000);
     if btc_swap_amount < min_swap_amount {
         bail!(
             "Swap amount ({} BTC) is too low. Must be at least {} BTC to cover transaction fees and dust.",

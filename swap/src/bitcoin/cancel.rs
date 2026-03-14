@@ -6,7 +6,7 @@ use crate::bitcoin::{
 };
 use ::bitcoin::util::bip143::SigHashCache;
 use ::bitcoin::{OutPoint, Script, SigHash, SigHashType, TxIn, TxOut, Txid};
-use anyhow::{Result, Context};
+use anyhow::Result;
 use ecdsa_fun::Signature;
 use miniscript::{Descriptor, DescriptorTrait};
 use serde::{Deserialize, Serialize};
@@ -107,7 +107,7 @@ impl TxCancel {
         };
 
         let tx_out = TxOut {
-            value: tx_lock.lock_amount().as_sat().checked_sub(TX_FEE).context("Lock amount is too small to cover the cancel transaction fee")?,
+            value: tx_lock.lock_amount().as_sat().saturating_sub(TX_FEE),
             script_pubkey: cancel_output_descriptor.script_pubkey(),
         };
 
@@ -226,8 +226,9 @@ impl TxCancel {
             witness: Vec::new(),
         };
 
+        let output_value = self.amount().as_sat().saturating_sub(TX_FEE);
         let tx_out = TxOut {
-            value: self.amount().as_sat().checked_sub(TX_FEE).context("Cancel amount is too small to cover the spend transaction fee")?,
+            value: output_value,
             script_pubkey: spend_address.script_pubkey(),
         };
 
