@@ -163,7 +163,7 @@ async fn next_state(
                 // Bob sends Alice his key
 
                 select! {
-                    _ = event_loop_handle.send_encrypted_signature(state.tx_redeem_encsig()) => {
+                    _ = event_loop_handle.send_encrypted_signature(state.tx_redeem_encsig()?) => {
                         BobState::EncSigSent(state)
                     },
                     _ = tx_lock_status.wait_until_confirmed_with(state.cancel_timelock) => {

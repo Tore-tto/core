@@ -73,7 +73,7 @@ impl Behaviour {
 
                 substream
                     .write_message(
-                        &serde_cbor::to_vec(&state2.next_message())
+                        &serde_cbor::to_vec(&state2.next_message()?)
                             .context("Failed to serialize message4")?,
                     )
                     .await?;

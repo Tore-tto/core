@@ -340,6 +340,16 @@ async fn determine_btc_to_swap(
     let max_accepted = bid_quote.max_quantity;
 
     let btc_swap_amount = min(max_giveable, max_accepted);
+
+    let min_swap_amount = Amount::from_sat(bitcoin::TX_FEE + 1_000);
+    if btc_swap_amount < min_swap_amount {
+        bail!(
+            "Swap amount ({} BTC) is too low. Must be at least {} BTC to cover transaction fees and dust.",
+            btc_swap_amount.as_btc(),
+            min_swap_amount.as_btc()
+        );
+    }
+
     info!("Swapping {} with {} fees", btc_swap_amount, fees);
 
     Ok(btc_swap_amount)
@@ -360,13 +370,13 @@ mod tests {
             async { Ok(quote_with_max(0.01)) },
             async { Ok(Amount::ZERO) },
             get_dummy_address(),
-            async { Ok(Amount::from_btc(0.0001)?) },
-            async { Ok(Amount::from_btc(0.00009)?) },
+            async { Ok(Amount::from_btc(0.001)?) },
+            async { Ok(Amount::from_btc(0.0009)?) },
         )
         .await
         .unwrap();
 
-        assert_eq!(amount, Amount::from_btc(0.00009).unwrap())
+        assert_eq!(amount, Amount::from_btc(0.0009).unwrap())
     }
 
     #[tokio::test]

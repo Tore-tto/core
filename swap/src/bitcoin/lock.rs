@@ -4,7 +4,7 @@ use crate::bitcoin::{
 };
 use ::bitcoin::util::psbt::PartiallySignedTransaction;
 use ::bitcoin::{OutPoint, TxIn, TxOut, Txid};
-use anyhow::{bail, Result};
+use anyhow::{bail, Context, Result};
 use bdk::database::BatchDatabase;
 use bitcoin::Script;
 use ecdsa_fun::fun::Point;
@@ -136,7 +136,7 @@ impl TxLock {
         &self,
         spend_address: &Address,
         sequence: Option<u32>,
-    ) -> Transaction {
+    ) -> anyhow::Result<Transaction> {
         let previous_output = self.as_outpoint();
 
         let tx_in = TxIn {
@@ -147,16 +147,19 @@ impl TxLock {
         };
 
         let tx_out = TxOut {
-            value: self.inner.clone().extract_tx().output[self.lock_output_vout()].value - TX_FEE,
+            value: self.inner.clone().extract_tx().output[self.lock_output_vout()]
+                .value
+                .checked_sub(TX_FEE)
+                .context("Lock amount is too small to cover the spend transaction fee")?,
             script_pubkey: spend_address.script_pubkey(),
         };
 
-        Transaction {
+        Ok(Transaction {
             version: 2,
             lock_time: 0,
             input: vec![tx_in],
             output: vec![tx_out],
-        }
+        })
     }
 }
 

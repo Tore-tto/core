@@ -24,10 +24,10 @@ pub struct TxRedeem {
 }
 
 impl TxRedeem {
-    pub fn new(tx_lock: &TxLock, redeem_address: &Address) -> Self {
+    pub fn new(tx_lock: &TxLock, redeem_address: &Address) -> Result<Self> {
         // lock_input is the shared output that is now being used as an input for the
         // redeem transaction
-        let tx_redeem = tx_lock.build_spend_transaction(redeem_address, None);
+        let tx_redeem = tx_lock.build_spend_transaction(redeem_address, None)?;
 
         let digest = SigHashCache::new(&tx_redeem).signature_hash(
             0, // Only one input: lock_input (lock transaction)
@@ -36,12 +36,12 @@ impl TxRedeem {
             SigHashType::All,
         );
 
-        Self {
+        Ok(Self {
             inner: tx_redeem,
             digest,
             lock_output_descriptor: tx_lock.output_descriptor.clone(),
             watch_script: redeem_address.script_pubkey(),
-        }
+        })
     }
 
     pub fn txid(&self) -> Txid {

@@ -20,8 +20,8 @@ impl TxPunish {
         tx_cancel: &TxCancel,
         punish_address: &Address,
         punish_timelock: PunishTimelock,
-    ) -> Self {
-        let tx_punish = tx_cancel.build_spend_transaction(punish_address, Some(punish_timelock));
+    ) -> Result<Self> {
+        let tx_punish = tx_cancel.build_spend_transaction(punish_address, Some(punish_timelock))?;
 
         let digest = SigHashCache::new(&tx_punish).signature_hash(
             0, // Only one input: cancel transaction
@@ -30,12 +30,12 @@ impl TxPunish {
             SigHashType::All,
         );
 
-        Self {
+        Ok(Self {
             inner: tx_punish,
             digest,
             cancel_output_descriptor: tx_cancel.output_descriptor.clone(),
             watch_script: punish_address.script_pubkey(),
-        }
+        })
     }
 
     pub fn digest(&self) -> SigHash {

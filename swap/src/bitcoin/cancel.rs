@@ -6,7 +6,7 @@ use crate::bitcoin::{
 };
 use ::bitcoin::util::bip143::SigHashCache;
 use ::bitcoin::{OutPoint, Script, SigHash, SigHashType, TxIn, TxOut, Txid};
-use anyhow::Result;
+use anyhow::{Result, Context};
 use ecdsa_fun::Signature;
 use miniscript::{Descriptor, DescriptorTrait};
 use serde::{Deserialize, Serialize};
@@ -96,7 +96,7 @@ impl TxCancel {
         cancel_timelock: CancelTimelock,
         A: PublicKey,
         B: PublicKey,
-    ) -> Self {
+    ) -> Result<Self> {
         let cancel_output_descriptor = build_shared_output_descriptor(A.0, B.0);
 
         let tx_in = TxIn {
@@ -107,7 +107,7 @@ impl TxCancel {
         };
 
         let tx_out = TxOut {
-            value: tx_lock.lock_amount().as_sat() - TX_FEE,
+            value: tx_lock.lock_amount().as_sat().checked_sub(TX_FEE).context("Lock amount is too small to cover the cancel transaction fee")?,
             script_pubkey: cancel_output_descriptor.script_pubkey(),
         };
 
@@ -125,12 +125,12 @@ impl TxCancel {
             SigHashType::All,
         );
 
-        Self {
+        Ok(Self {
             inner: transaction,
             digest,
             output_descriptor: cancel_output_descriptor,
             lock_output_descriptor: tx_lock.output_descriptor.clone(),
-        }
+        })
     }
 
     pub fn txid(&self) -> Txid {
@@ -216,7 +216,7 @@ impl TxCancel {
         &self,
         spend_address: &Address,
         sequence: Option<PunishTimelock>,
-    ) -> Transaction {
+    ) -> Result<Transaction> {
         let previous_output = self.as_outpoint();
 
         let tx_in = TxIn {
@@ -227,16 +227,16 @@ impl TxCancel {
         };
 
         let tx_out = TxOut {
-            value: self.amount().as_sat() - TX_FEE,
+            value: self.amount().as_sat().checked_sub(TX_FEE).context("Cancel amount is too small to cover the spend transaction fee")?,
             script_pubkey: spend_address.script_pubkey(),
         };
 
-        Transaction {
+        Ok(Transaction {
             version: 2,
             lock_time: 0,
             input: vec![tx_in],
             output: vec![tx_out],
-        }
+        })
     }
 }
 

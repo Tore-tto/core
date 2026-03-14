@@ -264,7 +264,7 @@ impl Client {
         address: &str,
     ) -> Result<CheckTxKey> {
         let params = CheckTxKeyParams {
-            tx_id: tx_id.to_owned(),
+            txid: tx_id.to_owned(),
             tx_key: tx_key.to_owned(),
             address: address.to_owned(),
         };
@@ -478,20 +478,15 @@ pub struct BlockHeight {
 
 #[derive(Serialize, Debug, Clone)]
 struct CheckTxKeyParams {
-    #[serde(rename = "txid")]
-    tx_id: String,
+    txid: String,
     tx_key: String,
     address: String,
 }
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct CheckTxKey {
-    #[serde(default)]
     pub confirmations: u64,
-    #[serde(default)]
     pub received: u64,
-    // Beldex RPC may return this field, monero returns `in_pool`
-    #[serde(default)]
     pub in_pool: bool,
 }
 #[derive(Clone, Debug, Serialize)]

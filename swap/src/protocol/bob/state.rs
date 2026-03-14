@@ -193,8 +193,8 @@ impl State1 {
     }
 
     pub fn receive(self, msg: Message3) -> Result<State2> {
-        let tx_cancel = TxCancel::new(&self.tx_lock, self.cancel_timelock, self.A, self.b.public());
-        let tx_refund = bitcoin::TxRefund::new(&tx_cancel, &self.refund_address);
+        let tx_cancel = TxCancel::new(&self.tx_lock, self.cancel_timelock, self.A, self.b.public())?;
+        let tx_refund = bitcoin::TxRefund::new(&tx_cancel, &self.refund_address)?;
 
         bitcoin::verify_sig(&self.A, &tx_cancel.digest(), &msg.tx_cancel_sig)?;
         bitcoin::verify_encsig(
@@ -246,17 +246,17 @@ pub struct State2 {
 }
 
 impl State2 {
-    pub fn next_message(&self) -> Message4 {
-        let tx_cancel = TxCancel::new(&self.tx_lock, self.cancel_timelock, self.A, self.b.public());
+    pub fn next_message(&self) -> Result<Message4> {
+        let tx_cancel = TxCancel::new(&self.tx_lock, self.cancel_timelock, self.A, self.b.public())?;
         let tx_cancel_sig = self.b.sign(tx_cancel.digest());
         let tx_punish =
-            bitcoin::TxPunish::new(&tx_cancel, &self.punish_address, self.punish_timelock);
+            bitcoin::TxPunish::new(&tx_cancel, &self.punish_address, self.punish_timelock)?;
         let tx_punish_sig = self.b.sign(tx_punish.digest());
 
-        Message4 {
+        Ok(Message4 {
             tx_punish_sig,
             tx_cancel_sig,
-        }
+        })
     }
 
     pub async fn lock_btc(self) -> Result<(State3, TxLock)> {
@@ -357,7 +357,7 @@ impl State3 {
         &self,
         bitcoin_wallet: &bitcoin::Wallet,
     ) -> Result<ExpiredTimelocks> {
-        let tx_cancel = TxCancel::new(&self.tx_lock, self.cancel_timelock, self.A, self.b.public());
+        let tx_cancel = TxCancel::new(&self.tx_lock, self.cancel_timelock, self.A, self.b.public())?;
 
         let tx_lock_status = bitcoin_wallet.status_of_script(&self.tx_lock).await?;
         let tx_cancel_status = bitcoin_wallet.status_of_script(&tx_cancel).await?;
@@ -389,13 +389,13 @@ pub struct State4 {
 }
 
 impl State4 {
-    pub fn tx_redeem_encsig(&self) -> bitcoin::EncryptedSignature {
-        let tx_redeem = bitcoin::TxRedeem::new(&self.tx_lock, &self.redeem_address);
-        self.b.encsign(self.S_a_bitcoin, tx_redeem.digest())
+    pub fn tx_redeem_encsig(&self) -> Result<bitcoin::EncryptedSignature> {
+        let tx_redeem = bitcoin::TxRedeem::new(&self.tx_lock, &self.redeem_address)?;
+        Ok(self.b.encsign(self.S_a_bitcoin, tx_redeem.digest()))
     }
 
     pub async fn watch_for_redeem_btc(&self, bitcoin_wallet: &bitcoin::Wallet) -> Result<State5> {
-        let tx_redeem = bitcoin::TxRedeem::new(&self.tx_lock, &self.redeem_address);
+        let tx_redeem = bitcoin::TxRedeem::new(&self.tx_lock, &self.redeem_address)?;
         let tx_redeem_encsig = self.b.encsign(self.S_a_bitcoin, tx_redeem.digest());
 
         bitcoin_wallet
@@ -424,7 +424,7 @@ impl State4 {
         &self,
         bitcoin_wallet: &bitcoin::Wallet,
     ) -> Result<ExpiredTimelocks> {
-        let tx_cancel = TxCancel::new(&self.tx_lock, self.cancel_timelock, self.A, self.b.public());
+        let tx_cancel = TxCancel::new(&self.tx_lock, self.cancel_timelock, self.A, self.b.public())?;
 
         let tx_lock_status = bitcoin_wallet.status_of_script(&self.tx_lock).await?;
         let tx_cancel_status = bitcoin_wallet.status_of_script(&tx_cancel).await?;
@@ -493,7 +493,7 @@ impl State6 {
         &self,
         bitcoin_wallet: &bitcoin::Wallet,
     ) -> Result<ExpiredTimelocks> {
-        let tx_cancel = TxCancel::new(&self.tx_lock, self.cancel_timelock, self.A, self.b.public());
+        let tx_cancel = TxCancel::new(&self.tx_lock, self.cancel_timelock, self.A, self.b.public())?;
 
         let tx_lock_status = bitcoin_wallet.status_of_script(&self.tx_lock).await?;
         let tx_cancel_status = bitcoin_wallet.status_of_script(&tx_cancel).await?;
@@ -511,7 +511,7 @@ impl State6 {
         bitcoin_wallet: &bitcoin::Wallet,
     ) -> Result<Transaction> {
         let tx_cancel =
-            bitcoin::TxCancel::new(&self.tx_lock, self.cancel_timelock, self.A, self.b.public());
+            bitcoin::TxCancel::new(&self.tx_lock, self.cancel_timelock, self.A, self.b.public())?;
 
         let tx = bitcoin_wallet.get_raw_transaction(tx_cancel.txid()).await?;
 
@@ -520,7 +520,7 @@ impl State6 {
 
     pub async fn submit_tx_cancel(&self, bitcoin_wallet: &bitcoin::Wallet) -> Result<Txid> {
         let transaction =
-            bitcoin::TxCancel::new(&self.tx_lock, self.cancel_timelock, self.A, self.b.public())
+            bitcoin::TxCancel::new(&self.tx_lock, self.cancel_timelock, self.A, self.b.public())?
                 .complete_as_bob(self.A, self.b.clone(), self.tx_cancel_sig_a.clone())
                 .context("Failed to complete Bitcoin cancel transaction")?;
 
@@ -531,8 +531,8 @@ impl State6 {
 
     pub async fn refund_btc(&self, bitcoin_wallet: &bitcoin::Wallet) -> Result<()> {
         let tx_cancel =
-            bitcoin::TxCancel::new(&self.tx_lock, self.cancel_timelock, self.A, self.b.public());
-        let tx_refund = bitcoin::TxRefund::new(&tx_cancel, &self.refund_address);
+            bitcoin::TxCancel::new(&self.tx_lock, self.cancel_timelock, self.A, self.b.public())?;
+        let tx_refund = bitcoin::TxRefund::new(&tx_cancel, &self.refund_address)?;
 
         let adaptor = Adaptor::<HashTranscript<Sha256>, Deterministic<Sha256>>::default();
 

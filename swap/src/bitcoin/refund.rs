@@ -20,8 +20,8 @@ pub struct TxRefund {
 }
 
 impl TxRefund {
-    pub fn new(tx_cancel: &TxCancel, refund_address: &Address) -> Self {
-        let tx_punish = tx_cancel.build_spend_transaction(refund_address, None);
+    pub fn new(tx_cancel: &TxCancel, refund_address: &Address) -> Result<Self> {
+        let tx_punish = tx_cancel.build_spend_transaction(refund_address, None)?;
 
         let digest = SigHashCache::new(&tx_punish).signature_hash(
             0, // Only one input: cancel transaction
@@ -30,12 +30,12 @@ impl TxRefund {
             SigHashType::All,
         );
 
-        Self {
+        Ok(Self {
             inner: tx_punish,
             digest,
             cancel_output_descriptor: tx_cancel.output_descriptor.clone(),
             watch_script: refund_address.script_pubkey(),
-        }
+        })
     }
 
     pub fn txid(&self) -> Txid {

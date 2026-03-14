@@ -281,15 +281,15 @@ mod tests {
         let min_pics = 1;
         let amount = Amount::from_piconero(min_pics);
         let monero = amount.to_string();
-        assert_eq!("0.000000000001 XMR", monero);
+        assert_eq!("0.000000001 XMR", monero);
     }
 
     #[test]
     fn display_monero_one() {
-        let min_pics = 1000000000000;
+        let min_pics = 1_000_000_000;
         let amount = Amount::from_piconero(min_pics);
         let monero = amount.to_string();
-        assert_eq!("1.000000000000 XMR", monero);
+        assert_eq!("1.000000000 XMR", monero);
     }
 
     #[test]
@@ -297,12 +297,12 @@ mod tests {
         let max_pics = 18_446_744_073_709_551_615;
         let amount = Amount::from_piconero(max_pics);
         let monero = amount.to_string();
-        assert_eq!("18446744.073709551615 XMR", monero);
+        assert_eq!("18446744073.709551615 XMR", monero);
     }
 
     #[test]
     fn parse_monero_min() {
-        let monero_min = "0.000000000001";
+        let monero_min = "0.000000001";
         let amount = Amount::parse_monero(monero_min).unwrap();
         let pics = amount.0;
         assert_eq!(1, pics);
@@ -313,12 +313,12 @@ mod tests {
         let monero = "123";
         let amount = Amount::parse_monero(monero).unwrap();
         let pics = amount.0;
-        assert_eq!(123000000000000, pics);
+        assert_eq!(123000000000, pics);
     }
 
     #[test]
     fn parse_monero_max() {
-        let monero = "18446744.073709551615";
+        let monero = "18446744073.709551615";
         let amount = Amount::parse_monero(monero).unwrap();
         let pics = amount.0;
         assert_eq!(18446744073709551615, pics);
@@ -326,7 +326,7 @@ mod tests {
 
     #[test]
     fn parse_monero_overflows() {
-        let overflow_pics = "18446744.073709551616";
+        let overflow_pics = "18446744073.709551616";
         let error = Amount::parse_monero(overflow_pics).unwrap_err();
         assert_eq!(
             error.downcast_ref::<OverflowError>().unwrap(),

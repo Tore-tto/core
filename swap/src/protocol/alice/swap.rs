@@ -255,14 +255,14 @@ async fn next_state(
             transfer_proof,
             state3,
         } => {
-            let tx_refund_status = bitcoin_wallet.subscribe_to(state3.tx_refund()).await;
-            let tx_cancel_status = bitcoin_wallet.subscribe_to(state3.tx_cancel()).await;
+            let tx_refund_status = bitcoin_wallet.subscribe_to(state3.tx_refund()?).await;
+            let tx_cancel_status = bitcoin_wallet.subscribe_to(state3.tx_cancel()?).await;
 
             select! {
                 seen_refund = tx_refund_status.wait_until_seen() => {
                     seen_refund.context("Failed to monitor refund transaction")?;
 
-                    let published_refund_tx = bitcoin_wallet.get_raw_transaction(state3.tx_refund().txid()).await?;
+                    let published_refund_tx = bitcoin_wallet.get_raw_transaction(state3.tx_refund()?.txid()).await?;
                     let spend_key = state3.extract_monero_private_key(published_refund_tx)?;
 
                     AliceState::BtcRefunded {
@@ -333,7 +333,7 @@ async fn next_state(
                     // refund tx was not included.
 
                     let published_refund_tx = bitcoin_wallet
-                        .get_raw_transaction(state3.tx_refund().txid())
+                        .get_raw_transaction(state3.tx_refund()?.txid())
                         .await?;
 
                     let spend_key = state3.extract_monero_private_key(published_refund_tx)?;

@@ -343,6 +343,7 @@ mod tests {
                         0 => Ok(CheckTxKey {
                             confirmations: 10,
                             received: 100,
+                            in_pool: false,
                         }),
                         _ => panic!("should not be called more than once"),
                     }
@@ -383,6 +384,7 @@ mod tests {
                                 confirmations: requests / 2, /* every 2nd request "yields" a
                                                               * confirmation */
                                 received: 100,
+                                in_pool: false,
                             })
                         }
                         _ => panic!("should not be called more than {} times", MAX_REQUESTS),

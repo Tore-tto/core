@@ -262,11 +262,11 @@ pub struct State2 {
 }
 
 impl State2 {
-    pub fn next_message(&self) -> Message3 {
+    pub fn next_message(&self) -> Result<Message3> {
         let tx_cancel =
-            bitcoin::TxCancel::new(&self.tx_lock, self.cancel_timelock, self.a.public(), self.B);
+            bitcoin::TxCancel::new(&self.tx_lock, self.cancel_timelock, self.a.public(), self.B)?;
 
-        let tx_refund = bitcoin::TxRefund::new(&tx_cancel, &self.refund_address);
+        let tx_refund = bitcoin::TxRefund::new(&tx_cancel, &self.refund_address)?;
         // Alice encsigns the refund transaction(bitcoin) digest with Bob's monero
         // pubkey(S_b). The refund transaction spends the output of
         // tx_lock_bitcoin to Bob's refund address.
@@ -275,19 +275,19 @@ impl State2 {
         let tx_refund_encsig = self.a.encsign(self.S_b_bitcoin, tx_refund.digest());
 
         let tx_cancel_sig = self.a.sign(tx_cancel.digest());
-        Message3 {
+        Ok(Message3 {
             tx_refund_encsig,
             tx_cancel_sig,
-        }
+        })
     }
 
     pub fn receive(self, msg: Message4) -> Result<State3> {
         let tx_cancel =
-            bitcoin::TxCancel::new(&self.tx_lock, self.cancel_timelock, self.a.public(), self.B);
+            bitcoin::TxCancel::new(&self.tx_lock, self.cancel_timelock, self.a.public(), self.B)?;
         bitcoin::verify_sig(&self.B, &tx_cancel.digest(), &msg.tx_cancel_sig)
             .context("Failed to verify cancel transaction")?;
         let tx_punish =
-            bitcoin::TxPunish::new(&tx_cancel, &self.punish_address, self.punish_timelock);
+            bitcoin::TxPunish::new(&tx_cancel, &self.punish_address, self.punish_timelock)?;
         bitcoin::verify_sig(&self.B, &tx_punish.digest(), &msg.tx_punish_sig)
             .context("Failed to verify punish transaction")?;
 
@@ -338,7 +338,7 @@ impl State3 {
         &self,
         bitcoin_wallet: &bitcoin::Wallet,
     ) -> Result<ExpiredTimelocks> {
-        let tx_cancel = self.tx_cancel();
+        let tx_cancel = self.tx_cancel()?;
 
         let tx_lock_status = bitcoin_wallet.status_of_script(&self.tx_lock).await?;
         let tx_cancel_status = bitcoin_wallet.status_of_script(&tx_cancel).await?;
@@ -382,19 +382,19 @@ impl State3 {
         }
     }
 
-    pub fn tx_cancel(&self) -> TxCancel {
+    pub fn tx_cancel(&self) -> Result<TxCancel> {
         TxCancel::new(&self.tx_lock, self.cancel_timelock, self.a.public(), self.B)
     }
 
-    pub fn tx_refund(&self) -> TxRefund {
-        bitcoin::TxRefund::new(&self.tx_cancel(), &self.refund_address)
+    pub fn tx_refund(&self) -> Result<TxRefund> {
+        bitcoin::TxRefund::new(&self.tx_cancel()?, &self.refund_address)
     }
 
     pub fn extract_monero_private_key(
         &self,
         published_refund_tx: bitcoin::Transaction,
     ) -> Result<monero::PrivateKey> {
-        self.tx_refund().extract_monero_private_key(
+        self.tx_refund()?.extract_monero_private_key(
             published_refund_tx,
             self.s_a,
             self.a.clone(),
@@ -406,26 +406,26 @@ impl State3 {
         &self,
         sig: bitcoin::EncryptedSignature,
     ) -> Result<bitcoin::Transaction> {
-        bitcoin::TxRedeem::new(&self.tx_lock, &self.redeem_address)
+        bitcoin::TxRedeem::new(&self.tx_lock, &self.redeem_address)?
             .complete(sig, self.a.clone(), self.s_a.to_secpfun_scalar(), self.B)
             .context("Failed to complete Bitcoin redeem transaction")
     }
 
     pub fn signed_cancel_transaction(&self) -> Result<bitcoin::Transaction> {
-        self.tx_cancel()
+        self.tx_cancel()?
             .complete_as_alice(self.a.clone(), self.B, self.tx_cancel_sig_bob.clone())
             .context("Failed to complete Bitcoin cancel transaction")
     }
 
     pub fn signed_punish_transaction(&self) -> Result<bitcoin::Transaction> {
-        self.tx_punish()
+        self.tx_punish()?
             .complete(self.tx_punish_sig_bob.clone(), self.a.clone(), self.B)
             .context("Failed to complete Bitcoin punish transaction")
     }
 
-    fn tx_punish(&self) -> TxPunish {
+    fn tx_punish(&self) -> Result<TxPunish> {
         bitcoin::TxPunish::new(
-            &self.tx_cancel(),
+            &self.tx_cancel()?,
             &self.punish_address,
             self.punish_timelock,
         )
