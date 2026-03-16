@@ -289,10 +289,10 @@ async fn next_state(
         } => {
             let view_key = state3.v;
 
-            // Ensure that the XMR to be refunded are spendable by awaiting 10 confirmations
+            // Ensure that the BDX to be refunded are spendable by awaiting 2 confirmations
             // on the lock transaction
             monero_wallet
-                .watch_for_transfer(state3.lock_xmr_watch_request(transfer_proof, 10))
+                .watch_for_transfer(state3.lock_xmr_watch_request(transfer_proof, 2))
                 .await?;
 
             monero_wallet
