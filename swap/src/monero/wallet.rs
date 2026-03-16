@@ -210,9 +210,15 @@ impl Wallet {
         wait_for_confirmations(
             txid.0,
             |txid| async move {
-                self.inner
-                    .lock()
-                    .await
+                // Refresh the wallet before each check so the BDX wallet-RPC
+                // syncs the latest blockchain state. Without this, check_tx_key
+                // always returns the same stale confirmation count and the loop
+                // hangs indefinitely after seeing the first confirmation.
+                let wallet = self.inner.lock().await;
+                if let Err(e) = wallet.refresh().await {
+                    tracing::debug!("Failed to refresh wallet before check_tx_key: {:#}", e);
+                }
+                wallet
                     .check_tx_key(&txid, &key, &address.to_string())
                     .await
             },
@@ -343,6 +349,7 @@ mod tests {
                         0 => Ok(CheckTxKey {
                             confirmations: 10,
                             received: 100,
+                            in_pool: false,
                         }),
                         _ => panic!("should not be called more than once"),
                     }
@@ -383,6 +390,7 @@ mod tests {
                                 confirmations: requests / 2, /* every 2nd request "yields" a
                                                               * confirmation */
                                 received: 100,
+                                in_pool: false,
                             })
                         }
                         _ => panic!("should not be called more than {} times", MAX_REQUESTS),
