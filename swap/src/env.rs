@@ -58,11 +58,11 @@ impl GetConfig for Mainnet {
 impl GetConfig for Testnet {
     fn get_config() -> Config {
         Config {
-            bitcoin_lock_confirmed_timeout: 12.hours(),
+            bitcoin_lock_confirmed_timeout: 24.hours(),
             bitcoin_finality_confirmations: 1,
             bitcoin_avg_block_time: 5.minutes(),
-            bitcoin_cancel_timelock: CancelTimelock::new(12),
-            bitcoin_punish_timelock: PunishTimelock::new(6),
+            bitcoin_cancel_timelock: CancelTimelock::new(72),
+            bitcoin_punish_timelock: PunishTimelock::new(36),
             bitcoin_network: bitcoin::Network::Testnet,
             monero_avg_block_time: 2.minutes(),
             monero_finality_confirmations: 2,
@@ -90,4 +90,3 @@ impl GetConfig for Regtest {
 fn sync_interval(avg_block_time: Duration) -> Duration {
     max(avg_block_time / 10, Duration::from_secs(1))
 }
-
