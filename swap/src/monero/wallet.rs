@@ -47,11 +47,7 @@ impl Wallet {
             monero::Address::from_str(client.get_address(0).await?.address.as_str())?;
         Ok(Self {
             inner: Mutex::new(client),
-            network: match env_config.monero_network {
-                beldex_rpc::BeldexNetwork::Mainnet  => monero::Network::Mainnet,
-                beldex_rpc::BeldexNetwork::Testnet  => monero::Network::Testnet,
-                beldex_rpc::BeldexNetwork::Stagenet => monero::Network::Stagenet,
-            },
+            network: env_config.monero_network,
             name,
             main_address,
             sync_interval: env_config.monero_sync_interval(),

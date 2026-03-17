@@ -138,7 +138,7 @@ async fn main() -> Result<()> {
                 Arc::new(monero_wallet),
                 env_config,
                 event_loop_handle,
-                receive_beldex_address.to_monero_address()?,
+                receive_beldex_address,
             )
             .with_init_params(send_bitcoin)
             .build()?;
@@ -200,7 +200,7 @@ async fn main() -> Result<()> {
                 Arc::new(monero_wallet),
                 env_config,
                 event_loop_handle,
-                receive_beldex_address.to_monero_address()?,
+                receive_beldex_address,
             )
             .build()?;
 

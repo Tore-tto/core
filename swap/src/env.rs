@@ -13,7 +13,7 @@ pub struct Config {
     pub bitcoin_network: bitcoin::Network,
     pub monero_avg_block_time: Duration,
     pub monero_finality_confirmations: u64,
-    pub monero_network: beldex_rpc::BeldexNetwork,
+    pub monero_network: monero::Network, 
 }
 
 impl Config {
@@ -50,7 +50,7 @@ impl GetConfig for Mainnet {
             bitcoin_network: bitcoin::Network::Bitcoin,
             monero_avg_block_time: 2.minutes(),
             monero_finality_confirmations: 2,
-            monero_network: beldex_rpc::BeldexNetwork::Mainnet,
+            monero_network: monero::Network::Mainnet,
         }
     }
 }
@@ -66,7 +66,7 @@ impl GetConfig for Testnet {
             bitcoin_network: bitcoin::Network::Testnet,
             monero_avg_block_time: 2.minutes(),
             monero_finality_confirmations: 2,
-            monero_network: beldex_rpc::BeldexNetwork::Testnet,
+            monero_network: monero::Network::Testnet,
         }
     }
 }
@@ -82,7 +82,7 @@ impl GetConfig for Regtest {
             bitcoin_network: bitcoin::Network::Regtest,
             monero_avg_block_time: 1.seconds(),
             monero_finality_confirmations: 2,
-            monero_network: beldex_rpc::BeldexNetwork::Testnet, // yes this is strange
+            monero_network: monero::Network::Testnet, // yes this is strange
         }
     }
 }

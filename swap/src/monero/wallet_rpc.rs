@@ -1,4 +1,4 @@
-use ::beldex_rpc::BeldexNetwork;
+use ::monero::Network;
 use anyhow::{Context, Result};
 use big_bytes::BigByte;
 use futures::{StreamExt, TryStreamExt};
@@ -122,7 +122,7 @@ impl WalletRpc {
         Ok(monero_wallet_rpc)
     }
 
-    pub async fn run(&self, network: BeldexNetwork, daemon_host: &str) -> Result<WalletRpcProcess> {
+    pub async fn run(&self, network: Network, daemon_host: &str) -> Result<WalletRpcProcess> {
         let port = tokio::net::TcpListener::bind("127.0.0.1:0")
             .await?
             .local_addr()?
@@ -135,9 +135,9 @@ impl WalletRpc {
             .stdout(Stdio::piped())
             .kill_on_drop(true)
             .arg(match network {
-                BeldexNetwork::Mainnet => "--mainnet",
-                BeldexNetwork::Testnet => "--testnet",
-                BeldexNetwork::Stagenet => "--stagenet",
+                Network::Mainnet => "--mainnet",
+                Network::Testnet => "--testnet",
+                Network::Stagenet => "--stagenet",
             })
             .arg("--daemon-address")
             .arg(daemon_host)

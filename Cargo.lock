@@ -69,6 +69,47 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "739f4a8db6605981345c5654f3a85b056ce52f37a39d34da03f25bf2151ea16e"
 
 [[package]]
+name = "amplify"
+version = "3.14.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ba2ec14f4fb838e9ddace42fa5944bb1ee4dff8477494ba48c5f874e16caf27a"
+dependencies = [
+ "amplify_derive",
+ "amplify_num",
+ "amplify_syn",
+ "wasm-bindgen",
+]
+
+[[package]]
+name = "amplify_derive"
+version = "2.11.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bcd9d6315c0fb32fb125a50992f64bca686a7012e8b897316cb8e30b0294315c"
+dependencies = [
+ "amplify_syn",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "amplify_num"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f27d3d00d3d115395a7a8a4dc045feb7aa82b641e485f7e15f4e67ac16f4f56d"
+
+[[package]]
+name = "amplify_syn"
+version = "1.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "da24db1445cc7bc3842fa072c2d51fe5b25b812b6a572d65842a4c72e87221ac"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "ansi_term"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -285,7 +326,7 @@ source = "git+https://github.com/bitcoindevkit/bdk.git?rev=e5ecc7f#e5ecc7f5410ae
 dependencies = [
  "async-trait",
  "bdk-macros",
- "bitcoin",
+ "bitcoin 0.26.0",
  "electrum-client 0.7.0",
  "js-sys",
  "log 0.4.14",
@@ -314,7 +355,7 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6687d59c3f65c5b318356154f00699e28dc75487abab31c09391c4febea51bbf"
 dependencies = [
- "bitcoin",
+ "bitcoin 0.26.0",
  "bitcoincore-rpc",
  "electrum-client 0.6.0",
  "log 0.4.14",
@@ -329,6 +370,12 @@ name = "bech32"
 version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2dabbe35f96fb9507f7330793dc490461b2962659ac5d427181e451a623751d1"
+
+[[package]]
+name = "bech32"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf9ff0bbfd639f15c74af777d81383cf53efb7c93613f6cab67c6c11e05bbf8b"
 
 [[package]]
 name = "beldex-harness"
@@ -351,7 +398,7 @@ name = "beldex-rpc"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "monero",
+ "monero 0.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "reqwest",
  "serde",
  "serde_json",
@@ -380,10 +427,21 @@ version = "0.26.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1ec5f88a446d66e7474a3b8fa2e348320b574463fb78d799d90ba68f79f48e0e"
 dependencies = [
- "bech32",
- "bitcoin_hashes",
- "secp256k1",
+ "bech32 0.7.3",
+ "bitcoin_hashes 0.9.4",
+ "secp256k1 0.20.1",
  "serde",
+]
+
+[[package]]
+name = "bitcoin"
+version = "0.28.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d4d30fb43d287492017964a1fd7d3f82e8cc760818471c6ef2d44111e317d5c3"
+dependencies = [
+ "bech32 0.8.1",
+ "bitcoin_hashes 0.10.0",
+ "secp256k1 0.22.2",
 ]
 
 [[package]]
@@ -393,7 +451,7 @@ source = "git+https://github.com/coblox/bitcoin-harness-rs#5a31e889618d2cdef613b
 dependencies = [
  "async-trait",
  "base64 0.12.3",
- "bitcoin",
+ "bitcoin 0.26.0",
  "bitcoincore-rpc-json",
  "futures",
  "hex 0.4.3",
@@ -418,6 +476,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "bitcoin_hashes"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "006cc91e1a1d99819bc5b8214be3555c1f0611b169f527a1fdc54ed1f2b745b0"
+
+[[package]]
 name = "bitcoincore-rpc"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -436,7 +500,7 @@ version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "977e55a945ab1e3c446dea93267876703c15e07c7d6eeb1dfa1766b3190c560f"
 dependencies = [
- "bitcoin",
+ "bitcoin 0.26.0",
  "hex 0.3.2",
  "serde",
  "serde_json",
@@ -649,6 +713,7 @@ dependencies = [
  "libc",
  "num-integer",
  "num-traits",
+ "time 0.1.43",
  "winapi 0.3.9",
 ]
 
@@ -979,7 +1044,7 @@ version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "21453800c95bb1aaa57490458c42d60c6277cb8a3e386030ec2381d5c2d4fa77"
 dependencies = [
- "bitcoin",
+ "bitcoin 0.26.0",
  "log 0.4.14",
  "rustls 0.16.0",
  "serde",
@@ -995,7 +1060,7 @@ version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4cab4d90cc575a7daab4cfed9e315912a88071bc47462e6be57516a2f01ccc89"
 dependencies = [
- "bitcoin",
+ "bitcoin 0.26.0",
  "log 0.4.14",
  "rustls 0.16.0",
  "serde",
@@ -1010,6 +1075,18 @@ name = "encode_unicode"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a357d28ed41a50f9c765dbfe56cbc04a64e53e5fc58ba79fbc34c10ef3df831f"
+
+[[package]]
+name = "encoding_derive_helpers"
+version = "1.7.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dc4ba8a88067b85c8714922db6e5f2af47b894d63b771dbb0c4d31d6607e9057"
+dependencies = [
+ "amplify",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
 
 [[package]]
 name = "encoding_rs"
@@ -2081,7 +2158,7 @@ version = "5.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "71f455be59a359d50370c4f587afbc5739c862e684c5afecae80ab93e7474b4e"
 dependencies = [
- "bitcoin",
+ "bitcoin 0.26.0",
  "serde",
 ]
 
@@ -2115,6 +2192,23 @@ checksum = "5a33c1b55807fbed163481b5ba66db4b2fa6cde694a5027be10fb724206c5897"
 dependencies = [
  "socket2 0.3.19",
  "winapi 0.3.9",
+]
+
+[[package]]
+name = "monero"
+version = "0.11.2"
+dependencies = [
+ "base58-monero",
+ "curve25519-dalek",
+ "fixed-hash",
+ "hex 0.4.3",
+ "hex-literal",
+ "keccak-hash",
+ "proc-macro2",
+ "serde",
+ "serde-big-array",
+ "strict_encoding",
+ "thiserror",
 ]
 
 [[package]]
@@ -3122,8 +3216,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "733b114f058f260c0af7591434eef4272ae1a8ec2751766d3cb89c6df8d5e450"
 dependencies = [
  "rand 0.6.5",
- "secp256k1-sys",
+ "secp256k1-sys 0.4.0",
  "serde",
+]
+
+[[package]]
+name = "secp256k1"
+version = "0.22.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "295642060261c80709ac034f52fca8e5a9fa2c7d341ded5cdb164b7c33768b2a"
+dependencies = [
+ "secp256k1-sys 0.5.2",
 ]
 
 [[package]]
@@ -3136,13 +3239,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "secp256k1-sys"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "152e20a0fd0519390fc43ab404663af8a0b794273d2a91d60ad4a39f13ffe110"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "secp256kfun"
 version = "0.4.2-alpha.0"
 source = "git+https://github.com/LLFourn/secp256kfun#8538ef22498170960a9769df2700c1986cc540fd"
 dependencies = [
  "digest 0.9.0",
  "rand_core 0.5.1",
- "secp256k1",
+ "secp256k1 0.20.1",
  "secp256kfun_parity_backend",
  "serde",
  "subtle 2.4.0",
@@ -3507,6 +3619,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "strict_encoding"
+version = "1.8.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "acd582d614348ea8ff707ab58b145e8cb504a929219f3efc2492bed62d27c4bb"
+dependencies = [
+ "amplify",
+ "bitcoin 0.28.2",
+ "bitcoin_hashes 0.10.0",
+ "chrono",
+ "strict_encoding_derive",
+]
+
+[[package]]
+name = "strict_encoding_derive"
+version = "1.7.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3bc7b868cb00c8861784b7f463c984c4b2ad20d1f23cec5997ad9cb41e559239"
+dependencies = [
+ "amplify_syn",
+ "encoding_derive_helpers",
+ "proc-macro2",
+ "syn",
+]
+
+[[package]]
 name = "strsim"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3584,7 +3721,7 @@ dependencies = [
  "beldex-harness",
  "beldex-rpc",
  "big-bytes",
- "bitcoin",
+ "bitcoin 0.26.0",
  "bitcoin-harness",
  "bmrng",
  "config",
@@ -3600,7 +3737,7 @@ dependencies = [
  "libp2p",
  "libp2p-async-await",
  "miniscript",
- "monero",
+ "monero 0.11.2",
  "pem",
  "port_check",
  "prettytable-rs",
