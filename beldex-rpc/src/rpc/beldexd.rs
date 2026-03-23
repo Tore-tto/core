@@ -41,7 +41,7 @@ impl Client {
 
         let res: Response<GetBlockHeaderByHeight> = serde_json::from_str(&response)?;
 
-        Ok(res.result.block_header)
+        Ok(res.into_result()?.block_header)
     }
 
     pub async fn get_block_count(&self) -> Result<u32> {
@@ -60,7 +60,7 @@ impl Client {
 
         let res: Response<BlockCount> = serde_json::from_str(&response)?;
 
-        Ok(res.result.count)
+        Ok(res.into_result()?.count)
     }
 }
 

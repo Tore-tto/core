@@ -398,7 +398,7 @@ name = "beldex-rpc"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "monero 0.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "monero",
  "reqwest",
  "serde",
  "serde_json",
@@ -2212,23 +2212,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "monero"
-version = "0.11.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dad9cdd100bffa1b21e9b1052394dd78246c6977b9e6f801b4acfd53ba62311e"
-dependencies = [
- "base58-monero",
- "curve25519-dalek",
- "fixed-hash",
- "hex 0.4.3",
- "hex-literal",
- "keccak-hash",
- "serde",
- "serde-big-array",
- "thiserror",
-]
-
-[[package]]
 name = "multihash"
 version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3737,7 +3720,7 @@ dependencies = [
  "libp2p",
  "libp2p-async-await",
  "miniscript",
- "monero 0.11.2",
+ "monero",
  "pem",
  "port_check",
  "prettytable-rs",

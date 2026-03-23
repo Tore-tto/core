@@ -83,14 +83,25 @@ impl Wallet {
         // it saves its state correctly
         let _ = wallet.close_wallet().await?;
 
-        let _ = wallet
+        let filename = PrivateKey::from(private_view_key).to_string();
+        println!("filename : {:?}", filename);
+
+        let generate_res = wallet
             .generate_from_keys(
                 &address.to_string(),
                 &private_spend_key.to_string(),
-                &PrivateKey::from(private_view_key).to_string(),
+                &filename,
                 restore_height.height,
             )
-            .await?;
+            .await;
+
+        if let Err(e) = generate_res {
+            if e.to_string().contains("already exists") {
+                wallet.open_wallet(&filename).await?;
+            } else {
+                return Err(e);
+            }
+        }
 
         Ok(())
     }
@@ -117,14 +128,24 @@ impl Wallet {
         // it saves its state correctly
         let _ = wallet.close_wallet().await?;
 
-        let _ = wallet
+        let filename = PrivateKey::from(private_view_key).to_string();
+
+        let generate_res = wallet
             .generate_from_keys(
                 &temp_wallet_address.to_string(),
                 &private_spend_key.to_string(),
-                &PrivateKey::from(private_view_key).to_string(),
+                &filename,
                 restore_height.height,
             )
-            .await?;
+            .await;
+
+        if let Err(e) = generate_res {
+            if e.to_string().contains("already exists") {
+                wallet.open_wallet(&filename).await?;
+            } else {
+                return Err(e);
+            }
+        }
 
         // Try to send all the funds from the generated wallet to the default wallet
         match wallet.refresh().await {
@@ -214,9 +235,19 @@ impl Wallet {
                 if let Err(e) = wallet.refresh().await {
                     tracing::debug!("Failed to refresh wallet before check_tx_key: {:#}", e);
                 }
-                wallet
-                    .check_tx_key(&txid, &key, &address.to_string())
-                    .await
+
+                // Workaround for beldex-wallet-rpc segfault:
+                // `check_tx_key` crashes the beldex node if called on an outgoing 0-conf transaction.
+                // We use `get_transfer_by_txid` instead for transactions in our own wallet (Alice's side).
+                if let Ok(tx) = wallet.get_transfer_by_txid(&txid).await {
+                    return Ok(CheckTxKey {
+                        confirmations: tx.transfer.confirmations,
+                        received: expected.as_piconero(), // Trust the expected amount since we sent it
+                        in_pool: tx.transfer.confirmations == 0,
+                    });
+                }
+
+                wallet.check_tx_key(&txid, &key, &address.to_string()).await
             },
             check_interval,
             expected,

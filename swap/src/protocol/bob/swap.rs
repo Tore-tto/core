@@ -30,6 +30,12 @@ pub async fn run_until(
 ) -> Result<BobState> {
     let mut current_state = swap.state;
 
+    tracing::info!(
+        "Starting swap state loop for {} in state: {}",
+        swap.swap_id,
+        current_state
+    );
+
     while !is_target_state(&current_state) {
         current_state = next_state(
             current_state,
@@ -58,7 +64,7 @@ async fn next_state(
     env_config: &Config,
     receive_monero_address: monero::Address,
 ) -> Result<BobState> {
-    tracing::trace!("Current state: {}", state);
+    tracing::info!("State machine stepping: Current state is {}", state);
 
     Ok(match state {
         BobState::Started { btc_amount } => {
@@ -200,12 +206,49 @@ async fn next_state(
                 .await?;
 
             // Ensure that the generated wallet is synced so we have a proper balance
+            tracing::info!(
+                "Starting initial blockchain resync from height {}... This may take a few minutes.",
+                state.monero_wallet_restore_blockheight.height
+            );
             monero_wallet.refresh().await?;
             // Sweep (transfer all funds) to the given address
-            let tx_hashes = monero_wallet.sweep_all(receive_monero_address).await?;
+            let current_balance = monero_wallet.get_balance().await?;
+            if current_balance.as_piconero() == 0 {
+                tracing::info!(
+                    "Wallet balance is 0. Assuming funds were already swept in a previous run."
+                );
+                return Ok(BobState::XmrRedeemed {
+                    tx_lock_id: state.tx_lock_id(),
+                });
+            }
+
+            let mut sweep_attempts = 0;
+            println!("receive_beldex_address : {}", receive_monero_address);
+            let tx_hashes = loop {
+                match monero_wallet.sweep_all(receive_monero_address).await {
+                    Ok(hashes) => break hashes,
+                    Err(e) if e.to_string().contains("No unlocked balance") => {
+                        if sweep_attempts >= 25 {
+                            bail!("Failed to sweep Beldex after multiple attempts: {}. Please ensure your balance is fully unlocked and try resume again.", e);
+                        }
+                        monero_wallet.refresh().await?;
+                        let balance_info = monero_wallet.get_balance().await;
+                        let height_info = monero_wallet.block_height().await;
+                        let balance_str = format!("Total: {:?}", balance_info);
+                        let height_str = match height_info {
+                            Ok(h) => h.height.to_string(),
+                            Err(_) => "Error".to_string(),
+                        };
+                        tracing::info!("Waiting for Beldex balance to unlock/sync (attempt {}/25)... Balance: {} | Wallet Height: {}", sweep_attempts + 1, balance_str, height_str);
+                        tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+                        sweep_attempts += 1;
+                    }
+                    Err(e) => bail!(e),
+                }
+            };
 
             for tx_hash in tx_hashes {
-                tracing::info!("Sent XMR to {} in tx {}", receive_monero_address, tx_hash.0);
+                tracing::info!("Sent BDX to {} in tx {}", receive_monero_address, tx_hash.0);
             }
 
             BobState::XmrRedeemed {

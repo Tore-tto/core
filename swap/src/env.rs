@@ -13,7 +13,7 @@ pub struct Config {
     pub bitcoin_network: bitcoin::Network,
     pub monero_avg_block_time: Duration,
     pub monero_finality_confirmations: u64,
-    pub monero_network: monero::Network, 
+    pub monero_network: monero::Network,
 }
 
 impl Config {
@@ -48,7 +48,7 @@ impl GetConfig for Mainnet {
             bitcoin_cancel_timelock: CancelTimelock::new(72),
             bitcoin_punish_timelock: PunishTimelock::new(72),
             bitcoin_network: bitcoin::Network::Bitcoin,
-            monero_avg_block_time: 2.minutes(),
+            monero_avg_block_time: 30.seconds(),
             monero_finality_confirmations: 2,
             monero_network: monero::Network::Mainnet,
         }
@@ -64,7 +64,7 @@ impl GetConfig for Testnet {
             bitcoin_cancel_timelock: CancelTimelock::new(72),
             bitcoin_punish_timelock: PunishTimelock::new(36),
             bitcoin_network: bitcoin::Network::Testnet,
-            monero_avg_block_time: 2.minutes(),
+            monero_avg_block_time: 30.seconds(),
             monero_finality_confirmations: 2,
             monero_network: monero::Network::Testnet,
         }

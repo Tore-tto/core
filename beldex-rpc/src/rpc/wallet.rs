@@ -45,7 +45,7 @@ impl Client {
         debug!("get address RPC response: {}", response);
 
         let r = serde_json::from_str::<Response<GetAddress>>(&response)?;
-        Ok(r.result)
+        r.into_result()
     }
 
     /// Gets the balance of account by index.
@@ -71,7 +71,7 @@ impl Client {
 
         let r = serde_json::from_str::<Response<GetBalance>>(&response)?;
 
-        let balance = r.result.balance;
+        let balance = r.into_result()?.balance;
 
         Ok(balance)
     }
@@ -94,7 +94,7 @@ impl Client {
         debug!("create account RPC response: {}", response);
 
         let r = serde_json::from_str::<Response<CreateAccount>>(&response)?;
-        Ok(r.result)
+        r.into_result()
     }
 
     /// Get accounts, filtered by tag ("" for no filtering).
@@ -117,7 +117,7 @@ impl Client {
 
         let r = serde_json::from_str::<Response<GetAccounts>>(&response)?;
 
-        Ok(r.result)
+        r.into_result()
     }
 
     /// Opens a wallet using `filename`.
@@ -149,7 +149,7 @@ impl Client {
 
     /// Close the currently opened wallet, after trying to save it.
     pub async fn close_wallet(&self) -> Result<()> {
-        let request = Request::new("close_wallet", "");
+        let request = Request::new("close_wallet", serde_json::json!({}));
 
         let response = self
             .inner
@@ -234,7 +234,7 @@ impl Client {
         debug!("transfer RPC response: {}", response);
 
         let r = serde_json::from_str::<Response<Transfer>>(&response)?;
-        Ok(r.result)
+        r.into_result()
     }
 
     /// Get wallet block height, this might be behind monerod height.
@@ -253,7 +253,7 @@ impl Client {
         debug!("wallet height RPC response: {}", response);
 
         let r = serde_json::from_str::<Response<BlockHeight>>(&response)?;
-        Ok(r.result)
+        r.into_result()
     }
 
     /// Check a transaction in the blockchain with its secret key.
@@ -282,7 +282,7 @@ impl Client {
         debug!("transfer RPC response: {}", response);
 
         let r = serde_json::from_str::<Response<CheckTxKey>>(&response)?;
-        Ok(r.result)
+        r.into_result()
     }
 
     pub async fn generate_from_keys(
@@ -315,7 +315,7 @@ impl Client {
         debug!("generate_from_keys RPC response: {}", response);
 
         let r = serde_json::from_str::<Response<GenerateFromKeys>>(&response)?;
-        Ok(r.result)
+        r.into_result()
     }
 
     pub async fn refresh(&self) -> Result<Refreshed> {
@@ -333,7 +333,7 @@ impl Client {
         debug!("refresh RPC response: {}", response);
 
         let r = serde_json::from_str::<Response<Refreshed>>(&response)?;
-        Ok(r.result)
+        r.into_result()
     }
 
     /// Transfers the complete balance of the account to `address`.
@@ -355,7 +355,7 @@ impl Client {
         debug!("sweep_all RPC response: {}", response);
 
         let r = serde_json::from_str::<Response<SweepAll>>(&response)?;
-        Ok(r.result)
+        r.into_result()
     }
 
     pub async fn get_version(&self) -> Result<Version> {
@@ -371,7 +371,28 @@ impl Client {
         debug!("get_version RPC response: {}", response);
 
         let r = serde_json::from_str::<Response<Version>>(&response)?;
-        Ok(r.result)
+        r.into_result()
+    }
+
+    pub async fn get_transfer_by_txid(&self, txid: &str) -> Result<GetTransferByTxid> {
+        let params = GetTransferByTxidParams {
+            txid: txid.to_owned(),
+        };
+        let request = Request::new("get_transfer_by_txid", params);
+
+        let response = self
+            .inner
+            .post(self.url.clone())
+            .json(&request)
+            .send()
+            .await?
+            .text()
+            .await?;
+
+        debug!("get_transfer_by_txid RPC response: {}", response);
+
+        let r = serde_json::from_str::<Response<GetTransferByTxid>>(&response)?;
+        r.into_result()
     }
 }
 
@@ -391,12 +412,12 @@ struct GetBalanceParams {
 }
 
 #[derive(Deserialize, Debug, Clone)]
-struct GetBalance {
-    balance: u64,
-    blocks_to_unlock: u32,
-    multisig_import_needed: bool,
-    time_to_unlock: u32,
-    unlocked_balance: u64,
+pub struct GetBalance {
+    pub balance: u64,
+    pub blocks_to_unlock: u32,
+    pub multisig_import_needed: bool,
+    pub time_to_unlock: u32,
+    pub unlocked_balance: u64,
 }
 
 #[derive(Serialize, Debug, Clone)]
@@ -519,15 +540,44 @@ pub struct SweepAllParams {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct SweepAll {
-    amount_list: Vec<u64>,
-    fee_list: Vec<u64>,
-    multisig_txset: String,
+    #[serde(default)]
+    pub amount_list: Vec<u64>,
+    #[serde(default)]
+    pub fee_list: Vec<u64>,
+    #[serde(default)]
+    pub multisig_txset: String,
     pub tx_hash_list: Vec<String>,
-    unsigned_txset: String,
-    weight_list: Vec<u32>,
+    #[serde(default)]
+    pub unsigned_txset: String,
+    #[serde(default)]
+    pub weight_list: Vec<u32>,
 }
 
 #[derive(Debug, Copy, Clone, Deserialize)]
 pub struct Version {
     version: u32,
+}
+
+#[derive(Serialize, Debug, Clone)]
+struct GetTransferByTxidParams {
+    txid: String,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+pub struct GetTransferByTxid {
+    pub transfer: TransferEntry,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+pub struct TransferEntry {
+    #[serde(default)]
+    pub amount: u64,
+    #[serde(default)]
+    pub confirmations: u64,
+    #[serde(default)]
+    pub fee: u64,
+    #[serde(default)]
+    pub txid: String,
+    #[serde(rename = "type", default)]
+    pub type_: String,
 }

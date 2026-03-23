@@ -149,7 +149,8 @@ async fn main() -> Result<()> {
                         .context("EventLoop panicked")?;
                 },
                 result = bob::run(swap) => {
-                    result.context("Failed to complete swap")?;
+                    let state = result.context("Failed to complete swap")?;
+                    info!("Swap successfully completed! Final state: {}", state);
                 }
             }
         }
@@ -175,6 +176,8 @@ async fn main() -> Result<()> {
                 },
             electrum_rpc_url,
         } => {
+            info!("Resuming swap {}", swap_id);
+
             if receive_beldex_address.network != env_config.monero_network {
                 bail!("The given beldex address is on network {:?}, expected address of network {:?}.", receive_beldex_address.network, env_config.monero_network)
             }
@@ -209,7 +212,8 @@ async fn main() -> Result<()> {
                     event_loop_result?;
                 },
                 swap_result = bob::run(swap) => {
-                    swap_result?;
+                    let state = swap_result?;
+                    info!("Swap successfully completed! Final state: {}", state);
                 }
             }
         }

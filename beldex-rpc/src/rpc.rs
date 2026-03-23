@@ -1,6 +1,7 @@
 pub mod beldexd;
 pub mod wallet;
 
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Debug, Clone)]
@@ -27,10 +28,26 @@ impl<T> Request<T> {
     }
 }
 
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct ResponseError {
+    pub code: i32,
+    pub message: String,
+}
+
 /// JSON RPC response.
 #[derive(Deserialize, Serialize, Debug, Clone)]
 struct Response<T> {
-    pub id: String,
+    pub id: serde_json::Value,
     pub jsonrpc: String,
-    pub result: T,
+    pub result: Option<T>,
+    pub error: Option<ResponseError>,
+}
+
+impl<T> Response<T> {
+    pub fn into_result(self) -> Result<T> {
+        if let Some(error) = self.error {
+            anyhow::bail!("RPC error: {} (code {})", error.message, error.code);
+        }
+        self.result.context("Missing result field in RPC response")
+    }
 }
