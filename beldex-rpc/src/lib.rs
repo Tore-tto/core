@@ -16,6 +16,7 @@ mod rpc;
 
 pub use self::rpc::*;
 use std::str::FromStr;
+/*
 use anyhow::{bail, Context, Result};
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum BeldexNetwork {
@@ -121,3 +122,4 @@ impl BeldexNetwork {
         }
     }
 }
+*/
